@@ -83,7 +83,7 @@ docker exec -it notification_app php artisan jwt:secret
 ### 8. Start Queue Worker
 
 ```bash
-docker exec -it queue php artisan queue:work
+docker exec -it notification_queue php artisan queue:work
 ```
 
 ## Authentication
