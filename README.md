@@ -35,7 +35,7 @@ It supports:
 
 ---
 
-## Docker Setup
+## Environment Setup
 
 ### 1. Clone Repository
 
@@ -50,31 +50,37 @@ cd notification-service
 docker-compose up -d --build
 ```
 
-### 3. Install Dependencies
+### 3. Create `.env` File
+
+```bash
+docker exec -it notification_app cp .env.example .env
+```
+
+### 4. Install Dependencies
 
 ```bash
 docker exec -it notification_app composer install
 ```
 
-### 4. Generate App Key
+### 5. Generate App Key
 
 ```bash
 docker exec -it notification_app php artisan key:generate
 ```
 
-### 5. Run Migration
+### 6. Run Migration
 
 ```bash
 docker exec -it notification_app php artisan migrate
 ```
 
-### 6. Generate JWT Secret
+### 7. Generate JWT Secret
 
 ```bash
 docker exec -it notification_app php artisan jwt:secret
 ```
 
-### 7. Start Queue Worker
+### 8. Start Queue Worker
 
 ```bash
 docker exec -it queue php artisan queue:work
