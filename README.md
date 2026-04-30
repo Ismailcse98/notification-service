@@ -40,7 +40,7 @@ It supports:
 ### 1. Clone Repository
 
 ```bash
-git clone <url>
+git clone https://github.com/Ismailcse98/notification-service.git
 cd notification-service
 ```
 
