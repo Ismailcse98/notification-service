@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('notification_logs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('notification_id')->index();
-            $table->string('type');
+            $table->string('type')->index();
             $table->string('status')->index();
             $table->integer('retry_count');
             $table->integer('response_time_ms');
-            $table->timestamp('sent_at')->nullable();
+            $table->timestamp('sent_at')->index()->nullable();
             $table->json('metadata')->nullable();
             $table->timestamps();
         });

@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('recipient');
             $table->text('message');
             $table->json('metadata')->nullable();
-            // $table->string('status')->default('pending')->index();
             $table->enum('status', ['pending','processing','sent','failed'])->default('pending')->index();
             $table->integer('retry_count')->default(0);
             $table->timestamps();
