@@ -10,7 +10,9 @@ It supports:
 - Asynchronous processing using Redis Queue
 - AI-ready structured logging
 - JWT authentication
-- Scalable architecture (50K+ notifications/day ready)
+- Analytics & dashboard APIs
+- Dockerized production setup
+- Supervisor-managed queue workers
 
 ---
 
@@ -31,6 +33,7 @@ It supports:
 - MySQL 8
 - Redis (Queue)
 - Docker & Docker Compose
+- Supervisor (Queue Worker Manager)
 - JWT Auth (tymon/jwt-auth)
 
 ---
@@ -78,12 +81,6 @@ docker exec -it notification_app php artisan migrate
 
 ```bash
 docker exec -it notification_app php artisan jwt:secret
-```
-
-### 8. Start Queue Worker
-
-```bash
-docker exec -it notification_queue php artisan queue:work
 ```
 
 ## Authentication
@@ -167,14 +164,17 @@ Authorization: Bearer {token}
 ### Async Processing
 
 - Uses Redis Queue  
-- Laravel Job: SendNotificationJob  
+- Job dispatched to Redis queue
+- Supervisor worker processes job  
 - Status flow:
     - pending → processing → sent / failed
+- Log stored for analytics
 
 ### Retry & Backoff
 
 - Max Retry: 3 times 
 - Backoff: 10s → 30s → 60s
+- Automatic failure handling
 
 ### AI / Analytics
 
@@ -217,12 +217,10 @@ GET /api/v1/dashboard
 
 ### Performance Optimization
 
-- DB Indexing:
-    - status
-    - type
-    - sent_at
+- DB Indexing: (status, type, sent_at)
+- Supervisor multi-worker processing
 - Eager Loading (avoid N+1)
-- Cursor Pagination
+- Cursor Pagination for large datasets
 - Query Optimization (single aggregate query)
 - Redis caching (dashboard)
 
@@ -242,6 +240,14 @@ Prevents system overload when external services fail.
 ### Rate Limiting
 
 - ThrottleRequests: 60 requests/minute
+
+### Rate Limiting
+This project uses Supervisor inside Docker to manage queue workers.
+
+## Managed by Supervisor:
+- Auto restart on failure
+- Multiple workers (numprocs)
+- Background processing
 
 ### Testing
 
@@ -277,4 +283,4 @@ app/
 - Dockerized
 - Event-driven (Kafka mock)
 - Feature + Unit Tests
-- 50K+/day Ready
+- Supervisor multi-worker processing

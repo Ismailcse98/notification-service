@@ -1,0 +1,52 @@
+FROM php:8.2-fpm-alpine
+
+# Install system dependencies + supervisor
+RUN apk add --no-cache \
+    bash \
+    curl \
+    libzip-dev \
+    oniguruma-dev \
+    supervisor \
+    autoconf \
+    g++ \
+    make
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql zip
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www
+
+# Copy project files
+COPY . .
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Fix permissions (IMPORTANT)
+RUN chmod -R 777 storage bootstrap/cache
+
+# Copy supervisor config
+COPY docker/supervisor/queue-worker.conf /etc/supervisor.d/queue-worker.ini
+
+# Create full supervisord config (FIXED)
+RUN echo "[supervisord]" > /etc/supervisord.conf && \
+    echo "nodaemon=true" >> /etc/supervisord.conf && \
+    echo "" >> /etc/supervisord.conf && \
+    echo "[unix_http_server]" >> /etc/supervisord.conf && \
+    echo "file=/var/run/supervisor.sock" >> /etc/supervisord.conf && \
+    echo "" >> /etc/supervisord.conf && \
+    echo "[supervisorctl]" >> /etc/supervisord.conf && \
+    echo "serverurl=unix:///var/run/supervisor.sock" >> /etc/supervisord.conf && \
+    echo "" >> /etc/supervisord.conf && \
+    echo "[rpcinterface:supervisor]" >> /etc/supervisord.conf && \
+    echo "supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface" >> /etc/supervisord.conf && \
+    echo "" >> /etc/supervisord.conf && \
+    echo "[include]" >> /etc/supervisord.conf && \
+    echo "files = /etc/supervisor.d/*.ini" >> /etc/supervisord.conf
+
+# Start supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

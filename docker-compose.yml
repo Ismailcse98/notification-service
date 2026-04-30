@@ -10,6 +10,8 @@ services:
       - mysql
       - redis
       - kafka
+    networks:
+      - notification-network
 
   nginx:
     image: nginx:alpine
@@ -19,6 +21,10 @@ services:
     volumes:
       - .:/var/www
       - ./docker/nginx:/etc/nginx/conf.d
+    depends_on:
+      - app
+    networks:
+      - notification-network
 
   mysql:
     image: mysql:8.0
@@ -31,22 +37,37 @@ services:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - notification-network
 
   redis:
     image: redis:alpine
     container_name: notification_redis
+    networks:
+      - notification-network
 
   queue:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.queue
     container_name: notification_queue
-    command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
     restart: always
     depends_on:
       - redis
       - mysql
+    networks:
+      - notification-network
+    command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
 
   kafka:
     image: docker.redpanda.com/redpandadata/redpanda:latest
+    container_name: notification_kafka
+    networks:
+      - notification-network
 
 volumes:
   mysql_data:
+
+networks:
+  notification-network:
+    driver: bridge
