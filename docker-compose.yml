@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: notification_app
+    volumes:
+      - .:/var/www
+    depends_on:
+      - mysql
+      - redis
+      - kafka
+
+  nginx:
+    image: nginx:alpine
+    container_name: notification_nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d
+
+  mysql:
+    image: mysql:8.0
+    container_name: notification_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: notification_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    container_name: notification_redis
+
+  queue:
+    build: .
+    container_name: notification_queue
+    command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
+    restart: always
+    depends_on:
+      - redis
+      - mysql
+
+  kafka:
+    image: docker.redpanda.com/redpandadata/redpanda:latest
+
+volumes:
+  mysql_data:
