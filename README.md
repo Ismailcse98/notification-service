@@ -83,6 +83,11 @@ docker exec -it notification_app php artisan migrate
 ```bash
 docker exec -it notification_app php artisan jwt:secret
 ```
+### 8. API Base URL
+
+```bash
+http://localhost:8000
+```
 
 ## Authentication
 
@@ -286,7 +291,7 @@ docker exec -it notification_app php artisan test
 
 ```bash
 app/
-├── Http/Controllers
+├── Http/Controllers/Api/V1
 ├── DTO
 ├── Events
 ├── Helpers
