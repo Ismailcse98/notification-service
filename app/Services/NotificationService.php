@@ -18,10 +18,10 @@ class NotificationService
         $notification = $this->repo->create((array)$dto);
         
         // For event-driven (Kafka/mock) 
-        event(new NotificationSentEvent($notification));
+        // event(new NotificationSentEvent($notification));
 
         // For Notificaton with Circuit Breaker
-        dispatch(new SendNotificationJob($notification->id));
+        // dispatch(new SendNotificationJob($notification->id));
 
         return $notification;
     }

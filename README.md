@@ -13,6 +13,7 @@ It supports:
 - Analytics & dashboard APIs
 - Dockerized production setup
 - Supervisor-managed queue workers
+- Notification Observer
 
 ---
 
@@ -86,10 +87,13 @@ docker exec -it notification_app php artisan jwt:secret
 ## Authentication
 
 ### Register
+
 ```bash
 POST /api/v1/register
 ```
+
 ### Payload
+
 ```bash
 {
     "name": "ismail",
@@ -98,7 +102,9 @@ POST /api/v1/register
     "phone": "01890893098"
 }
 ```
+
 ### Response
+
 ```bash
 {
     "access_token": "JWT_TOKEN",
@@ -108,10 +114,13 @@ POST /api/v1/register
 ```
 
 ### Login
+
 ```bash
 POST /api/v1/login
 ```
+
 ### Payload
+
 ```bash
 {
     "email": "ismailbdcse@mail.com",
@@ -120,8 +129,9 @@ POST /api/v1/login
 ```
 
 ### Response
+
 ```bash
-{ 
+{
     "access_token": "JWT_TOKEN",
     "token_type": "Bearer",
     "expires_in": 3600
@@ -131,80 +141,89 @@ POST /api/v1/login
 ## Notification API
 
 ### Send Notification
+
 ```bash
 POST /api/v1/notifications/send
 ```
 
 ### Headers
+
 ```bash
 Authorization: Bearer {token}
 ```
 
 ### Payload
+
 ```bash
-{ 
+{
     "user_id": 101,
     "type": "sms",
     "recipient": "+8801XXXXXXXXX",
     "message": "Your bill is due",
-    "metadata": 
-    { 
+    "metadata":
+    {
         "campaign": "billing_reminder"
     }
 }
 ```
 
 ### Response
+
 ```bash
-{ 
+{
     "status": "queued"
 }
 ```
 
 ### Async Processing
 
-- Uses Redis Queue  
+- Uses Redis Queue
 - Job dispatched to Redis queue
-- Supervisor worker processes job  
+- Supervisor worker processes job
 - Status flow:
     - pending → processing → sent / failed
 - Log stored for analytics
+- `NotificationObserver` listens to the `created` event
 
 ### Retry & Backoff
 
-- Max Retry: 3 times 
+- Max Retry: 3 times
 - Backoff: 10s → 30s → 60s
 - Automatic failure handling
 
 ### AI / Analytics
 
 ## Endpoint
+
 ```bash
 GET /api/v1/analytics/training-data
 ```
 
 ## Output
+
 ```bash
-{ 
+{
     "notification_id": 1,
     "type": "sms",
     "status": "sent",
     "retry_count": 0,
     "response_time_ms": 120,
     "sent_at": "2026-01-01",
-    "metadata": 
-    { 
+    "metadata":
+    {
         "campaign": "billing"
-    } 
+    }
 }
 ```
 
 ## Dashboard API
+
 ```bash
 GET /api/v1/dashboard
 ```
 
 ## Response
+
 ```bash
 {
     "total": 0,
@@ -224,13 +243,12 @@ GET /api/v1/dashboard
 - Query Optimization (single aggregate query)
 - Redis caching (dashboard)
 
-
 ### Circuit Breaker
+
 Prevents system overload when external services fail.
 
 - After 5 failures → STOP sending
 - Auto retry after cooldown (60s)
-
 
 ### Event-Driven (Kafka Mock)
 
@@ -241,10 +259,12 @@ Prevents system overload when external services fail.
 
 - ThrottleRequests: 60 requests/minute
 
-### Rate Limiting
+### Supervisor
+
 This project uses Supervisor inside Docker to manage queue workers.
 
 ## Managed by Supervisor:
+
 - Auto restart on failure
 - Multiple workers (numprocs)
 - Background processing
@@ -252,23 +272,27 @@ This project uses Supervisor inside Docker to manage queue workers.
 ### Testing
 
 ## Run Tests
+
 ```bash
 docker exec -it notification_app php artisan test
 ```
 
 ## Includes:
+
 - Feature Test (API)
 - Unit Test (DTO)
 
 ## Project Structure:
+
 ```bash
-app/ 
+app/
 ├── Http/Controllers
 ├── DTO
 ├── Events
 ├── Helpers
 ├── Jobs
 ├── Listeners
+├── Observers
 ├── Repositories
 ├── Services
 ```
