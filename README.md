@@ -13,7 +13,7 @@ It supports:
 - Analytics & dashboard APIs
 - Dockerized production setup
 - Supervisor-managed queue workers
-- Notification Observer
+- Observer pattern for event tracking
 
 ---
 
@@ -188,7 +188,6 @@ Authorization: Bearer {token}
 - Status flow:
     - pending → processing → sent / failed
 - Log stored for analytics
-- `NotificationObserver` listens to the `created` event
 
 ### Retry & Backoff
 
@@ -313,3 +312,4 @@ app/
 - Event-driven (Kafka mock)
 - Feature + Unit Tests
 - Supervisor multi-worker processing
+- Observer pattern for event tracking
